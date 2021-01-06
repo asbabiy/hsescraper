@@ -8,7 +8,6 @@ from bs4 import BeautifulSoup
 def normalize(html):
     soup = BeautifulSoup(html, features='lxml')
 
-    # for i in ['.lead-in', '[class*="caption"]', '[class*="picture"]', '[class*="image"]']:
     for i in ['[class*="caption"]', '[class*="picture"]', '[class*="image"]']:
         if tag := soup.select(i):
             for el in tag:
@@ -18,16 +17,17 @@ def normalize(html):
     text = re.sub(r'\s+', ' ', text)
     text = text.strip()
 
-    return text
+    return text if text else ('N/A',)
 
 
-def process_tags(tags):
-    return tags if ' '.join(tags).strip() else None
+def process_na(item):
+    return item.strip() if ' '.join(item).strip() else ('N/A',)
 
 
-def convert_date(text):
-    text = normalize(text)
-    dt = dateparser.parse(text)
+def convert_date(html):
+    soup = BeautifulSoup(html, features='lxml')
+    date = ' '.join(i.get_text() for i in soup.find_all('div')[1:])
+    dt = dateparser.parse(date)
     return dt
 
 
@@ -35,7 +35,14 @@ class PostItem(Item):
     visit_ts = Field(
         output_processor=TakeFirst()
     )
+    date = Field(
+        input_processor=MapCompose(convert_date),
+        output_processor=TakeFirst()
+    )
     link = Field(
+        output_processor=TakeFirst()
+    )
+    parent_link = Field(
         output_processor=TakeFirst()
     )
     campus = Field(
@@ -49,22 +56,22 @@ class PostItem(Item):
         input_processor=MapCompose(normalize),
         output_processor=TakeFirst()
     )
-    date = Field(
-        input_processor=MapCompose(convert_date),
-        output_processor=TakeFirst()
-    )
     text = Field(
         input_processor=MapCompose(normalize),
         output_processor=Join()
     )
-    sections = Field()
-    tags = Field(
-        input_processor=MapCompose(process_tags)
+    section = Field(
+        output_processor=TakeFirst()
     )
-    people = Field()
+    tags = Field(
+        input_processor=MapCompose(process_na)
+    )
+    people = Field(
+        input_processor=MapCompose(process_na)
+    )
     branches = Field(
         input_processor=MapCompose(normalize)
     )
 
     def __str__(self):
-        return ''
+        return f'Post: {self["link"]}.'

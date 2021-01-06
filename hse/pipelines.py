@@ -1,6 +1,6 @@
 from sqlalchemy.orm import sessionmaker
 from scrapy.exceptions import DropItem
-from hse.models import Post, Meta, Person, Branch, Tag, Section, db_connect, create_table
+from hse.models import Post, Meta, Person, Branch, Tag, db_connect, create_table
 
 
 class EmptyPostsPipeline:
@@ -9,6 +9,7 @@ class EmptyPostsPipeline:
         """Removes posts with no content"""
         if "text" not in item:
             raise DropItem('Empty post found.')
+
         return item
 
 
@@ -33,12 +34,14 @@ class SavePostsPipeline(object):
         meta = Meta()
 
         post.title = item['title']
-        post.description = item['description']
+        post.description = item.get('description', 'N/A')
         post.text = item['text']
 
         meta.link = item['link']
+        meta.parent_link = item['parent_link']
         meta.campus = item['campus']
-        meta.date = item['date']
+        meta.date = item.get('date')
+        meta.section = item.get('section', 'N/A')
         meta.visit_ts = item['visit_ts']
 
         if "tags" in item:
@@ -47,13 +50,6 @@ class SavePostsPipeline(object):
                 if record := session.query(Tag).filter_by(name=tag_name).first():
                     tag = record
                 meta.tags.append(tag)
-
-        if "section" in item:
-            for section_name in item['sections']:
-                section = Section(name=section_name)
-                if record := session.query(Section).filter_by(name=section_name).first():
-                    section = record
-                meta.sections.append(section)
 
         if "branches" in item:
             for branch_name in item['branches']:

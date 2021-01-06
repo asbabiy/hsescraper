@@ -37,22 +37,15 @@ meta_branch = Table(
     Column('branch_id', Integer, ForeignKey('branch.id'))
 )
 
-meta_section = Table(
-    'meta_section', Base.metadata,
-    Column('meta_id', Integer, ForeignKey('meta.id')),
-    Column('section_id', Integer, ForeignKey('section.id'))
-)
-
 
 class Post(Base):
     __tablename__ = "post"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, ForeignKey('meta.id'), primary_key=True)
     title = Column('title', Unicode(300), nullable=False)
-    description = Column('description', Unicode(2000), nullable=False)
+    description = Column('description', Unicode(2000))
     text = Column('text', UnicodeText(), nullable=False)
 
-    meta_id = Column(Integer, ForeignKey('meta.id'))
     meta = relationship("Meta", backref=backref("post", uselist=False))
 
 
@@ -62,16 +55,15 @@ class Meta(Base):
     id = Column(Integer, primary_key=True)
     visit_ts = Column(DateTime(), nullable=False)
     link = Column('link', String(80), nullable=False, unique=True)
+    parent_link = Column('parent_link', String(80), nullable=False)
     campus = Column('campus', Unicode(20), nullable=False)
-    date = Column('date', Date(), nullable=False)
+    section = Column('section', Unicode(80), nullable=False)
+    date = Column('date', Date())
 
     tags = relationship('Tag', secondary='meta_tag',
                         lazy='dynamic', backref="meta")
 
     branches = relationship('Branch', secondary='meta_branch',
-                            lazy='dynamic', backref="meta")
-
-    sections = relationship('Section', secondary='meta_section',
                             lazy='dynamic', backref="meta")
 
     people = relationship('Person', secondary='meta_person',
@@ -83,13 +75,6 @@ class Tag(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column('name', Unicode(60), unique=True)
-
-
-class Section(Base):
-    __tablename__ = "section"
-
-    id = Column(Integer, primary_key=True)
-    name = Column('name', Unicode(80), unique=True)
 
 
 class Person(Base):

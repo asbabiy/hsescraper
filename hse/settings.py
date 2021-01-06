@@ -17,26 +17,30 @@ NEWSPIDER_MODULE = 'hse.spiders'
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64)'
 # USER_AGENT = 'Alexander, bac03704@gmail.com'
 
+# SPIDERMON_ENABLED = True
+
+# AUTOUNIT_ENABLED = True
+
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
 # DB connection path
-CONNECTION_STRING = 'sqlite:///posts.db'
+CONNECTION_STRING = 'sqlite:///app/posts.db'
 
 # Logging level
 LOG_LEVEL = "INFO"
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-#CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 5
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+# DOWNLOAD_DELAY = 1
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
-CONCURRENT_REQUESTS_PER_IP = 4
+# CONCURRENT_REQUESTS_PER_IP = 4
 
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
@@ -52,9 +56,10 @@ CONCURRENT_REQUESTS_PER_IP = 4
 
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
-#    'hse.middlewares.HseSpiderMiddleware': 543,
-#}
+SPIDER_MIDDLEWARES = {
+   # 'hse.middlewares.HseSpiderMiddleware': 543,
+   'scrapy_autounit.AutounitMiddleware': 950
+}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
@@ -73,17 +78,23 @@ CONCURRENT_REQUESTS_PER_IP = 4
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
-#EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-#}
+# EXTENSIONS = {
+#    'spidermon.contrib.scrapy.extensions.Spidermon': 500
+#    # 'scrapy.extensions.telnet.TelnetConsole': None,
+# }
 
 # Configure item pipelines
 ITEM_PIPELINES = {
    # 'hse.pipelines.DefaultValuesPipeline': 100,
    'hse.pipelines.DuplicatesPipeline': 200,
    'hse.pipelines.EmptyPostsPipeline': 300,
-   'hse.pipelines.SavePostsPipeline': 400,
+   'spidermon.contrib.scrapy.pipelines.ItemValidationPipeline': 400,
+   'hse.pipelines.SavePostsPipeline': 500,
 }
+
+SPIDERMON_VALIDATION_MODELS = (
+    'hse.validators.PostItem',
+)
 
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
