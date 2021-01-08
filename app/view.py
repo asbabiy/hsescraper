@@ -9,6 +9,7 @@ def create_view(path, name):
     CREATE VIEW IF NOT EXISTS {name} AS
     SELECT 
         pt.title AS title,
+        pt.text as text,
         m.campus AS campus,
         m.date AS date,
         m.section AS section,
