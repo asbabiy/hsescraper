@@ -64,7 +64,7 @@ filters = {
 }
 
 filtered_view = Table('filtered_view', metadata)
-filter_data = filter_rows(data, session, filters, date_range)
+filter_data = filter_rows(data, filters, date_range)
 filter_view_query = CreateView(filtered_view, filter_data, temp=True).compile()
 
 c.execute(str(filter_view_query))

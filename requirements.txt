@@ -5,6 +5,7 @@ itemloaders==1.0.4
 beautifulsoup4==4.9.3
 SQLAlchemy==1.3.22
 streamlit==0.74.1
+sqlalchemy-views==0.2.4
 pandas==1.2.0
 setuptools==51.1.1
 bs4==0.0.1
