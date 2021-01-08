@@ -97,7 +97,9 @@ stats = {
 stats_df = pd.DataFrame(stats, index=['Статистика']).T
 st.write(stats_df)
 
-if show_stats_query := st.checkbox('Показать запрос'):
+show_stats_query = st.checkbox('Показать запрос')
+
+if show_stats_query:
     st.code(sqlparse.format(str(filter_view_query), reindent=True), language='sql')
 
 st.title('Поиск фраз в новостях')
