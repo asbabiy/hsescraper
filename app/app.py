@@ -18,12 +18,15 @@ import sqlparse
 
 # ------------------------------------------ Database Connection Establishing ------------------------------------------
 
-conn = sqlite3.connect('hsescraper/app/posts.db')
+import os
+st.write(os.getcwd())
+
+conn = sqlite3.connect('app/posts.db')
 conn.create_function('REGEXP', 2, lambda x, y: 1 if re.search(x, y) else 0)
 c = conn.cursor()
-create_view('hsescraper/app/posts.db', 'data')
+create_view('app/posts.db', 'data')
 
-engine = create_engine('sqlite:///hsescraper/app/posts.db')
+engine = create_engine('sqlite:///app/posts.db')
 metadata = MetaData(bind=engine)
 Session = sessionmaker(bind=engine)
 session = Session()
