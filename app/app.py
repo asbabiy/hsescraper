@@ -20,7 +20,6 @@ import sqlparse
 # ------------------------------------------ Database Connection Establishing ------------------------------------------
 
 db_verity = get_db('news')
-st.write(db_verity)
 assert db_verity == 149168128, "Database is corrupted."
 
 conn = sqlite3.connect('app/news.db')
@@ -125,4 +124,4 @@ news_df = pd.DataFrame(search_result, columns=['title', 'campus', 'date', 'link'
 st.dataframe(news_df.head())
 st.write('Всего:', len(news_df), 'новостей')
 
-# conn.close()
+conn.close()
