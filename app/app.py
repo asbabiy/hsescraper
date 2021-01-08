@@ -26,7 +26,7 @@ conn.create_function('REGEXP', 2, lambda x, y: 1 if re.search(x, y) else 0)
 c = conn.cursor()
 # create_view('app/posts.db', 'data')
 
-engine = create_engine('sqlite://app/posts.db')
+engine = create_engine('sqlite:////app/hsescraper/app/posts.db')
 metadata = MetaData(bind=engine)
 Session = sessionmaker(bind=engine)
 session = Session()
