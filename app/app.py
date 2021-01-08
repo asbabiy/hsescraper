@@ -14,7 +14,7 @@ from db import get_db
 
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy_views import CreateView
+from sqlalchemy_views import CreateView, DropView
 import sqlparse
 
 # ------------------------------------------ Database Connection Establishing ------------------------------------------
@@ -70,8 +70,12 @@ filters = {
 
 filtered_view = Table('filtered_view', metadata)
 filter_data = filter_rows(data, filters, date_range)
-filter_view_query = CreateView(filtered_view, filter_data, temp=True).compile()
 
+drop_view = DropView(filtered_view, if_exists=True).compile()
+c.execute(str(drop_view))
+conn.commit()
+
+filter_view_query = CreateView(filtered_view, filter_data).compile()
 c.execute(str(filter_view_query))
 conn.commit()
 
