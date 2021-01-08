@@ -10,6 +10,7 @@ import pandas as pd
 
 from view import create_view
 from supplementary import filter_rows
+from db import get_db
 
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.orm import sessionmaker
@@ -18,15 +19,16 @@ import sqlparse
 
 # ------------------------------------------ Database Connection Establishing ------------------------------------------
 
-import os
-st.write(os.getcwd())
+db_verity = get_db('news')
+st.write(db_verity)
+assert db_verity == 149168128, "Database is corrupted."
 
-# conn = sqlite3.connect('app/posts.db')
-# conn.create_function('REGEXP', 2, lambda x, y: 1 if re.search(x, y) else 0)
-# c = conn.cursor()
-# create_view('app/posts.db', 'data')
+conn = sqlite3.connect('app/news.db')
+conn.create_function('REGEXP', 2, lambda x, y: 1 if re.search(x, y) else 0)
+c = conn.cursor()
+create_view('app/news.db', 'data')
 
-engine = create_engine('sqlite:///posts.db')
+engine = create_engine('sqlite:///app/news.db')
 metadata = MetaData(bind=engine)
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -70,20 +72,19 @@ filtered_view = Table('filtered_view', metadata)
 filter_data = filter_rows(data, filters, date_range)
 filter_view_query = CreateView(filtered_view, filter_data, temp=True).compile()
 
-# c.execute(str(filter_view_query))
-# conn.commit()
+c.execute(str(filter_view_query))
+conn.commit()
 
 # -------------------------------------------------- First Page Section ------------------------------------------------
 
 
 st.title('Статистика по запросу')
 
-with engine.connect() as con:
-    avg_text_len = con.execute('SELECT avg(length(text)) FROM filtered_view;').fetchone()[0]
-    news_count = con.execute('SELECT count(DISTINCT link) FROM filtered_view;').fetchone()[0]
-    popular_tag = con.execute('SELECT tag FROM filtered_view GROUP BY tag ORDER BY COUNT(*) DESC LIMIT 1;').fetchone()
-    popular_section = con.execute('SELECT section FROM filtered_view GROUP BY section ORDER BY COUNT(*) DESC LIMIT 1;').fetchone()
-    popular_branch = con.execute('SELECT branch FROM filtered_view GROUP BY branch ORDER BY COUNT(*) DESC LIMIT 1;').fetchone()
+avg_text_len = c.execute('SELECT avg(length(text)) FROM filtered_view;').fetchone()[0]
+news_count = c.execute('SELECT count(DISTINCT link) FROM filtered_view;').fetchone()[0]
+popular_tag = c.execute('SELECT tag FROM filtered_view GROUP BY tag ORDER BY COUNT(*) DESC LIMIT 1;').fetchone()
+popular_section = c.execute('SELECT section FROM filtered_view GROUP BY section ORDER BY COUNT(*) DESC LIMIT 1;').fetchone()
+popular_branch = c.execute('SELECT branch FROM filtered_view GROUP BY branch ORDER BY COUNT(*) DESC LIMIT 1;').fetchone()
 
 stats = {
     'Количество постов': news_count,
@@ -96,9 +97,7 @@ stats = {
 stats_df = pd.DataFrame(stats, index=['Статистика']).T
 st.write(stats_df)
 
-show_stats_query = st.checkbox('Показать запрос')
-
-if show_stats_query:
+if show_stats_query := st.checkbox('Показать запрос'):
     st.code(sqlparse.format(str(filter_view_query), reindent=True), language='sql')
 
 st.title('Поиск фраз в новостях')
@@ -106,15 +105,14 @@ search_query = st.text_input('Введите искомое слово:')
 use_regex = st.checkbox('Использовать регулярные выражения')
 search_mode = {True: 'REGEXP', False: 'LIKE'}
 
-with engine.connect() as con:
-    search_result = con.execute('''
-    SELECT 
-        title, campus, date, link
-    FROM post 
-        LEFT JOIN meta AS m 
-            ON post.id = m.id
-    WHERE text {} ?;
-    '''.format(search_mode[use_regex]), (search_query if use_regex else f"%{search_query}%",)).fetchall()
+search_result = c.execute('''
+SELECT 
+    title, campus, date, link
+FROM post 
+    LEFT JOIN meta AS m 
+        ON post.id = m.id
+WHERE text {} ?;
+'''.format(search_mode[use_regex]), (search_query if use_regex else f"%{search_query}%",)).fetchall()
 
 st.markdown(f'Записи, содержащие выражение `{search_query if search_query else "_"}`:')
 news_df = pd.DataFrame(search_result, columns=['title', 'campus', 'date', 'link'])

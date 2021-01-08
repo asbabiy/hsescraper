@@ -2,7 +2,6 @@ import sqlite3
 import streamlit as st
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def create_view(path, name):
     conn = sqlite3.connect(path)
     cursor = conn.cursor()
