@@ -81,7 +81,7 @@ conn.commit()
 # -------------------------------------------------- First Page Section ------------------------------------------------
 
 st.title('Корпус новостного раздела Вышки')
-st.title('Статистика по запросу')
+st.header('Статистика по запросу')
 
 avg_text_len = c.execute('SELECT avg(length(text)) FROM filtered_view;').fetchone()[0]
 news_count = c.execute('SELECT count(DISTINCT link) FROM filtered_view;').fetchone()[0]
@@ -105,7 +105,7 @@ show_stats_query = st.checkbox('Показать запрос')
 if show_stats_query:
     st.code(sqlparse.format(str(filter_view_query), reindent=True), language='sql')
 
-st.title('Поиск фраз в новостях')
+st.header('Поиск фраз в новостях')
 search_query = st.text_input('Введите искомое слово:')
 use_regex = st.checkbox('Использовать регулярные выражения')
 search_mode = {True: 'REGEXP', False: 'LIKE'}
