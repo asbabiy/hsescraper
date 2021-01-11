@@ -80,7 +80,7 @@ conn.commit()
 
 # -------------------------------------------------- First Page Section ------------------------------------------------
 
-
+st.title('Корпус новостного раздела Вышки')
 st.title('Статистика по запросу')
 
 avg_text_len = c.execute('SELECT avg(length(text)) FROM filtered_view;').fetchone()[0]
